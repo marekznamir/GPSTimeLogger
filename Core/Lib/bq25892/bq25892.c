@@ -9,23 +9,24 @@ void bq25892_init(void)
 
 }
 
-uint8_t* mem_read(uint16_t reg_mem_adress)
+
+
+uint8_t mem_read(uint16_t reg_mem_adress)
 {
-    uint8_t* data;
-    HAL_I2C_Mem_Read(hi2c1, BQ25892_I2C_ADDR, reg_mem_adress, I2C_MEMADD_SIZE_8BIT, data, 1, 0)
+    uint8_t data;
+    HAL_I2C_Mem_Read(&hi2c1, BQ25892_I2C_ADDR, reg_mem_adress, I2C_MEMADD_SIZE_8BIT, &data, 1, 0);
 
     return data;
 }
 
 void handle_reg0b(void)
 {
-    uint8_t* data;
-    data = mem_read(REG0B_ADDR);
+    uint8_t data = mem_read(REG0B_ADDR);
 
-    uint8_t vbus_status_bits = (*data & 0x07);
-    uint8_t charging_status_bits = (*data & 0x18);
-    uint8_t power_good_status_bits = (*data & 0x20);
-    uint8_t vsys_regulation_status_bits = (*data & 0x80);
+    uint8_t vbus_status_bits = (data & 0x07);
+    uint8_t charging_status_bits = (data & 0x18);
+    uint8_t power_good_status_bits = (data & 0x20);
+    uint8_t vsys_regulation_status_bits = (data & 0x80);
 
     switch (vbus_status_bits)
     {
@@ -90,8 +91,7 @@ void handle_reg0b(void)
 
 void handle_reg0c(void)
 {
-    uint8_t* data;
-    data = mem_read(REG0C_ADDR);
+    uint8_t data = mem_read(REG0C_ADDR);
 
 
 
