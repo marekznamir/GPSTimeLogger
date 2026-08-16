@@ -93,8 +93,11 @@ void handle_reg0c(void)
 {
     uint8_t data = mem_read(REG0C_ADDR);
 
-
-
+    uint8_t watchdog_fault_bits = (data & 0x01);
+    uint8_t boost_fault_bits = (data & 0x02);
+    uint8_t chrg_fault_bits = (data & 0x0C);
+    uint8_t bat_fault_bits = (data & 0x10);
+    uint8_t ntc_fault_bits = (data & 0xE0);
 }
 
 void bq25892_int(void)
