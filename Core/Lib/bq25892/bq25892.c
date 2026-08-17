@@ -159,7 +159,7 @@ void read_reg0e(void)
 {
     uint8_t data = mem_read(REG0E_ADDR);
 
-    uint8_t therm_stat_bits = (data & 0x01);
+    uint8_t therm_stat_bits = (data & 0x80);
 
     switch (therm_stat_bits) {
         case 0x00:
@@ -170,8 +170,8 @@ void read_reg0e(void)
     }
 
     //bq25892.batv = 
-    uint8_t bit_pos = 0x01;
-    uint16_t batv = 0;
+    uint8_t bit_pos = 0x40;
+    uint16_t batv = 2304;
     for(uint8_t i = 0; i < 7; i++)
     {
         if(data & bit_pos)
@@ -191,6 +191,6 @@ void bq25892_int(void)
 
 void bq25892_init(void)
 {
-    const uint8_t REG02_CONFIG_DATA = (0x1D && 0x01); // Start ADC conversion (CONV_START bit to 1)
+    const uint8_t REG02_CONFIG_DATA = (0x1D | 0x80); // Start ADC conversion (CONV_START bit to 1)
     mem_write(REG02_ADDR, REG02_CONFIG_DATA);
 }
