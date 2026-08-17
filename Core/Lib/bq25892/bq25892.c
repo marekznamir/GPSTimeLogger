@@ -1,7 +1,7 @@
 #include "bq25892.h"
 #include <stdint.h>
 
-inline uint8_t mem_read(uint16_t reg_mem_address)
+static inline uint8_t mem_read(uint16_t reg_mem_address)
 {
     uint8_t data;
     HAL_I2C_Mem_Read(BQ25892_I2C_Handle, BQ25892_I2C_ADDR, reg_mem_address, I2C_MEMADD_SIZE_8BIT, &data, 1, 0);
@@ -9,7 +9,7 @@ inline uint8_t mem_read(uint16_t reg_mem_address)
     return data;
 }
 
-inline void mem_write(uint16_t reg_mem_address, uint8_t data)
+static inline void mem_write(uint16_t reg_mem_address, uint8_t data)
 {
     HAL_I2C_Mem_Write(BQ25892_I2C_Handle, BQ25892_I2C_ADDR, reg_mem_address, I2C_MEMADD_SIZE_8BIT, &data, 1, 0);
 }
@@ -18,35 +18,35 @@ void read_reg0b(void)
 {
     uint8_t data = mem_read(REG0B_ADDR);
 
-    uint8_t vbus_status_bits = (data & 0x07);
+    uint8_t vbus_status_bits = (data & 0xE0);
     uint8_t charging_status_bits = (data & 0x18);
-    uint8_t power_good_status_bits = (data & 0x20);
-    uint8_t vsys_regulation_status_bits = (data & 0x80);
+    uint8_t power_good_status_bits = (data & 0x04);
+    uint8_t vsys_regulation_status_bits = (data & 0x01);
 
     switch (vbus_status_bits)
     {
         case 0x00:
             bq25892.vbus_status = NO_INPUT_OR_USB_HOST_SDP;
             break;
-        case 0x01:
+        case 0x20:
             bq25892.vbus_status = USB_HOST_SDP;
             break;
-        case 0x02:
+        case 0x40:
             bq25892.vbus_status = USB_CDP_OR_ADAPTER;
             break;
-        case 0x03:
+        case 0x60:
             bq25892.vbus_status = USB_DCP;
             break;
-        case 0x04:
+        case 0x80:
             bq25892.vbus_status = DCP_MAX_CHARGE;
             break;
-        case 0x05:
+        case 0xA0:
             bq25892.vbus_status = UNKNOWN_ADAPTER;
             break;
-        case 0x06:
+        case 0xC0:
             bq25892.vbus_status = NON_STANDARD_ADAPTER;
             break;
-        case 0x07:
+        case 0xE0:
             bq25892.vbus_status = USB_OTG;
     }
 
@@ -55,23 +55,23 @@ void read_reg0b(void)
         case 0x00:
             bq25892.charging_status = NOT_CHARGING;
             break;
-        case 0x01:
+        case 0x08:
             bq25892.charging_status = PRE_CHARGE;
             break;
-        case 0x02:
+        case 0x10:
             bq25892.charging_status = FAST_CHARGING;
             break;
-        case 0x03:
+        case 0x18:
             bq25892.charging_status = CHARGE_TERMINATION_DONE;
     }
 
     switch (power_good_status_bits)
     {
         case 0x00:
-            bq25892.power_good_status = NOT_CHARGING;
+            bq25892.power_good_status = NOT_POWER_GOOD;
             break;
-        case 0x01:
-            bq25892.charging_status = POWER_GOOD;
+        case 0x04:
+            bq25892.power_good_status = POWER_GOOD;
     }
 
     switch (vsys_regulation_status_bits)
@@ -88,18 +88,18 @@ void read_reg0c(void)
 {
     uint8_t data = mem_read(REG0C_ADDR);
 
-    uint8_t watchdog_fault_bits = (data & 0x01);
-    uint8_t boost_fault_bits = (data & 0x02);
-    uint8_t chrg_fault_bits = (data & 0x0C);
-    uint8_t bat_fault_bits = (data & 0x10);
-    uint8_t ntc_fault_bits = (data & 0xE0);
+    uint8_t watchdog_fault_bits = (data & 0x80);
+    uint8_t boost_fault_bits = (data & 0x40);
+    uint8_t chrg_fault_bits = (data & 0x30);
+    uint8_t bat_fault_bits = (data & 0x08);
+    uint8_t ntc_fault_bits = (data & 0x07);
 
     switch (watchdog_fault_bits)
     {
         case 0x00:
             bq25892.watchdog_fault = WATCHDOG_GOOD;
             break;
-        case 0x01:
+        case 0x80:
             bq25892.watchdog_fault = TIMER_EXPIRATION;
     }
 
@@ -108,7 +108,7 @@ void read_reg0c(void)
         case 0x00:
             bq25892.boost_fault = BOOST_GOOD;
             break;
-        case 0x01:
+        case 0x40:
             bq25892.boost_fault = BOOST_NOT_GOOD;
     }
 
@@ -117,13 +117,13 @@ void read_reg0c(void)
         case 0x00:
             bq25892.chrg_fault = CHARGE_GOOD;
             break;
-        case 0x01:
+        case 0x10:
             bq25892.chrg_fault = INPUT_FAULT;
             break;
-        case 0x02:
+        case 0x20:
             bq25892.chrg_fault = THERMAL_SHUTDOWN;
             break;
-        case 0x03:
+        case 0x30:
             bq25892.chrg_fault = CHARGE_SAFETY_TIMER_EXPIRATION;
     }
 
@@ -132,7 +132,7 @@ void read_reg0c(void)
         case 0x00:
             bq25892.bat_fault = BAT_GOOD;
             break;
-        case 0x01:
+        case 0x08:
             bq25892.bat_fault = BATOVP;
     }
 
@@ -191,6 +191,6 @@ void bq25892_int(void)
 
 void bq25892_init(void)
 {
-    const uint8_t REG02_CONFIG_DATA = (0x1D | 0x80); // Start ADC conversion (CONV_START bit to 1)
+    const uint8_t REG02_CONFIG_DATA = (0x1D | 0x80); // Start ADC conversion (CONV_START bit to 7)
     mem_write(REG02_ADDR, REG02_CONFIG_DATA);
 }
