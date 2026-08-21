@@ -127,7 +127,7 @@ typedef struct  {
     uint16_t batv;
 } BQ25892;
 
-static BQ25892 bq25892;
+extern BQ25892 bq25892;
 
 void bq25892_init(void);
 

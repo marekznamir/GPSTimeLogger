@@ -169,7 +169,6 @@ void read_reg0e(void)
             bq25892.therm_stat = THERM_REG_ON;
     }
 
-    //bq25892.batv = 
     uint8_t bit_pos = 0x40;
     uint16_t batv = 2304;
     for(uint8_t i = 0; i < 7; i++)
