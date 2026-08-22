@@ -4,14 +4,14 @@
 static inline uint8_t mem_read(uint16_t reg_mem_address)
 {
     uint8_t data;
-    HAL_I2C_Mem_Read(BQ25892_I2C_Handle, BQ25892_I2C_ADDR, reg_mem_address, I2C_MEMADD_SIZE_8BIT, &data, 1, 0);
+    HAL_I2C_Mem_Read(BQ25892_I2C_Handle, BQ25892_I2C_ADDR, reg_mem_address, I2C_MEMADD_SIZE_8BIT, &data, 1, 10);
 
     return data;
 }
 
 static inline void mem_write(uint16_t reg_mem_address, uint8_t data)
 {
-    HAL_I2C_Mem_Write(BQ25892_I2C_Handle, BQ25892_I2C_ADDR, reg_mem_address, I2C_MEMADD_SIZE_8BIT, &data, 1, 0);
+    HAL_I2C_Mem_Write(BQ25892_I2C_Handle, BQ25892_I2C_ADDR, reg_mem_address, I2C_MEMADD_SIZE_8BIT, &data, 1, 10);
 }
 
 void read_reg0b(void)
