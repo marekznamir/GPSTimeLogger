@@ -46,12 +46,14 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Lib/bq25892/bq25892.c
+    Core/Lib/neo_m9n/neo_m9n.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     Core/Lib/bq25892/
+    Core/Lib/neo_m9n/
 )
 
 # Add project symbols (macros)
