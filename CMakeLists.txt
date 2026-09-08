@@ -12,11 +12,6 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#set(CMAKE_CXX_EXTENSIONS ON)
-
-
 # Define the build type
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
@@ -38,6 +33,12 @@ enable_language(C ASM)
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
 
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS ON
+)
+
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
 
@@ -49,14 +50,30 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
 )
 
+# TO JEST MOJE G
+file(GLOB_RECURSE DISPLAY_SOURCES CONFIGURE_DEPENDS 
+    Core/Lib/Display/*.cpp
+    Core/Lib/Display/*.c
+)
+
+# TO TEŻ
+file(GLOB_RECURSE DISPLAY_HEADERS CONFIGURE_DEPENDS 
+    Core/Lib/Display/*.hpp
+    Core/Lib/Display/*.h
+)
+
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
+    ${DISPLAY_SOURCES}
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
+    Core/Lib/Display/DisplayController/
+    Core/Lib/Display/DisplayView/Screens
+    Core/Lib/Display/DisplayView/Widgets
 )
 
 # Add project symbols (macros)
@@ -70,6 +87,9 @@ list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-
+    u8g2
     # Add user defined libraries
 )
+
+# CHWILOWE 
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -frtti)
