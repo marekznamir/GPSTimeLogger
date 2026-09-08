@@ -27,6 +27,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+//#include "DisplayController.hpp"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,12 +50,19 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
+/* Definitions for Display */
+osThreadId_t DisplayHandle;
+const osThreadAttr_t Display_attributes = {
+  .name = "Display",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for Keyboard */
+osThreadId_t KeyboardHandle;
+const osThreadAttr_t Keyboard_attributes = {
+  .name = "Keyboard",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,7 +70,9 @@ const osThreadAttr_t defaultTask_attributes = {
 
 /* USER CODE END FunctionPrototypes */
 
-void StartDefaultTask(void *argument);
+void StartDisplayTask(void *argument);
+
+void StartKeyboardTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -93,8 +104,11 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* creation of Display */
+  DisplayHandle = osThreadNew(StartDisplayTask, NULL, &Display_attributes);
+
+  /* creation of Keyboard */
+  KeyboardHandle = osThreadNew(StartKeyboardTask, NULL, &Keyboard_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -106,24 +120,43 @@ void MX_FREERTOS_Init(void) {
 
 }
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_StartDisplayTask */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the Display thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+/* USER CODE END Header_StartDisplayTask */
+void StartDisplayTask(void *argument)
 {
+  //DisplayController displayController;
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
-  /* USER CODE BEGIN StartDefaultTask */
+  /* USER CODE BEGIN StartDisplayTask */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartDefaultTask */
+  /* USER CODE END StartDisplayTask */
+}
+
+/* USER CODE BEGIN Header_StartKeyboardTask */
+/**
+* @brief Function implementing the Keyboard thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartKeyboardTask */
+void StartKeyboardTask(void *argument)
+{
+  /* USER CODE BEGIN StartKeyboardTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartKeyboardTask */
 }
 
 /* Private application code --------------------------------------------------*/
