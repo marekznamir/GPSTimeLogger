@@ -4,8 +4,6 @@
 #include "DisplayController.hpp"
 
 #include <cstring>
-#include <vector>
-#include <iostream>
 
 extern DisplayController displayController;
 
@@ -113,7 +111,6 @@ void Settings::buttonUp()
 {
 	if (moveIndex == 0) { return; }
 
-	std::cout << moveIndex << std::endl;
 	widgets[moveIndex]->setUnselected();
 	moveIndex--;
 
@@ -124,8 +121,6 @@ void Settings::buttonUp()
 void Settings::buttonDown()
 {
 	if (moveIndex == widgetsSize - 1) { return; }
-
-	std::cout << moveIndex << std::endl;
 
 	widgets[moveIndex]->setUnselected();
 	moveIndex++;
