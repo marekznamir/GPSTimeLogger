@@ -26,7 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "freertosWrapper.h"
 //#include "DisplayController.hpp"
 
 /* USER CODE END Includes */
@@ -134,11 +134,12 @@ void StartDisplayTask(void *argument)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDisplayTask */
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+  // for(;;)
+  // {
+  //   osDelay(1);
+  // }
   /* USER CODE END StartDisplayTask */
+  displayTask();
 }
 
 /* USER CODE BEGIN Header_StartKeyboardTask */

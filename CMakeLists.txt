@@ -66,6 +66,7 @@ file(GLOB_RECURSE DISPLAY_HEADERS CONFIGURE_DEPENDS
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     ${DISPLAY_SOURCES}
+    Core/Src/freertosWrapper.cpp
 )
 
 # Add include paths
