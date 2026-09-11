@@ -52,14 +52,14 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 # TO JEST MOJE G
 file(GLOB_RECURSE DISPLAY_SOURCES CONFIGURE_DEPENDS 
-    Core/Lib/Display/*.cpp
-    Core/Lib/Display/*.c
+    Core/Lib/GUI/Display/*.cpp
+    Core/Lib/GUI/Display/*.c
 )
 
 # TO TEŻ
 file(GLOB_RECURSE DISPLAY_HEADERS CONFIGURE_DEPENDS 
-    Core/Lib/Display/*.hpp
-    Core/Lib/Display/*.h
+    Core/Lib/GUI/Display/*.hpp
+    Core/Lib/GUI/Display/*.h
 )
 
 # Add sources to executable
@@ -71,9 +71,9 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
-    Core/Lib/Display/DisplayController/
-    Core/Lib/Display/DisplayView/Screens
-    Core/Lib/Display/DisplayView/Widgets
+    Core/Lib/GUI/Display/DisplayController/
+    Core/Lib/GUI/Display/DisplayView/Widgets/
+    Core/Lib/GUI/Display/DisplayView/Screens/
 )
 
 # Add project symbols (macros)
