@@ -71,7 +71,6 @@ const osThreadAttr_t Keyboard_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDisplayTask(void *argument);
-
 void StartKeyboardTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
@@ -129,7 +128,6 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_StartDisplayTask */
 void StartDisplayTask(void *argument)
 {
-  //DisplayController displayController;
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDisplayTask */
@@ -139,7 +137,6 @@ void StartDisplayTask(void *argument)
   //   osDelay(1);
   // }
   /* USER CODE END StartDisplayTask */
-  displayTask();
 }
 
 /* USER CODE BEGIN Header_StartKeyboardTask */
