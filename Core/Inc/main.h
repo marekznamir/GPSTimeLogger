@@ -79,8 +79,8 @@ void Error_Handler(void);
 #define VCP_TX_GPIO_Port GPIOA
 #define VCP_RX_Pin GPIO_PIN_3
 #define VCP_RX_GPIO_Port GPIOA
-#define LCD_CS_Pin GPIO_PIN_4
-#define LCD_CS_GPIO_Port GPIOA
+#define LCD_NSS_Pin GPIO_PIN_4
+#define LCD_NSS_GPIO_Port GPIOA
 #define LCD_SCK_Pin GPIO_PIN_5
 #define LCD_SCK_GPIO_Port GPIOA
 #define LCD_CD_Pin GPIO_PIN_6
