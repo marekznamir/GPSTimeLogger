@@ -229,6 +229,14 @@ SECTIONS
   PROVIDE( __bss_start = __tbss_start );
   PROVIDE( __bss_size = __bss_end - __bss_start );
 
+  .dma_buffer (NOLOAD) : ALIGN(4)
+  {
+    . = ALIGN(4);
+    *(.dma_buffer)     /* Złap wszystkie zmienne z tym atrybutem */
+    *(.dma_buffer*)
+    . = ALIGN(4);
+  } >RAM
+
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack (NOLOAD) :
   {
@@ -239,8 +247,6 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >DTCMRAM
-
-
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
