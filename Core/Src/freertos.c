@@ -19,10 +19,12 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
+#include "stm32h7a3xx.h"
 #include "task.h"
 #include "main.h"
-#include "FreeRTOS.h"
 #include "cmsis_os2.h"
+#include "string.h"
+#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -51,6 +53,18 @@
 extern SPI_HandleTypeDef hspi1;
 
 osSemaphoreId_t spiSem_;
+
+osMessageQueueId_t gpsQueue = NULL;
+
+__attribute__((section(".dma_buffer"), aligned(32)))
+uint8_t gpsDmaBuffer[GPS_DMA_BUFFER_SIZE];
+
+static char gpsAssemblyBuffer[GPS_FRAME_SIZE];
+static uint16_t gpsAssemblyLength = 0;
+
+volatile uint32_t gpsRxEventCount = 0;
+volatile uint16_t gpsRxLastSize = 0;
+volatile uint8_t gpsFirstByte = 0;
 /* USER CODE END Variables */
 /* Definitions for Display */
 osThreadId_t DisplayHandle;
@@ -66,14 +80,70 @@ const osThreadAttr_t Keyboard_attributes = {
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for NEO_M9N */
+osThreadId_t NEO_M9NHandle;
+const osThreadAttr_t NEO_M9N_attributes = {
+  .name = "NEO_M9N",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+static void GPS_ProcessReceivedBytes(
+    const uint8_t *data,
+    uint16_t size)
+{
+    for (uint16_t i = 0; i < size; ++i)
+    {
+        char character = (char)data[i];
 
+        if (character == '$')
+        {
+            gpsAssemblyLength = 0;
+        }
+
+        if (gpsAssemblyLength < (GPS_FRAME_SIZE - 1))
+        {
+            gpsAssemblyBuffer[gpsAssemblyLength++] = character;
+        }
+        else
+        {
+            /* Ramka za długa — odrzucamy ją */
+            gpsAssemblyLength = 0;
+            continue;
+        }
+
+        if (character == '\n')
+        {
+            GpsFrame_t frame;
+
+            frame.length = gpsAssemblyLength;
+
+            memcpy(
+                frame.data,
+                gpsAssemblyBuffer,
+                gpsAssemblyLength
+            );
+            
+            frame.data[frame.length] = '\0';
+
+            osMessageQueuePut(
+                gpsQueue,
+                &frame,
+                0,
+                0
+            );
+
+            gpsAssemblyLength = 0;
+        }
+    }
+}
 /* USER CODE END FunctionPrototypes */
 
 void StartDisplayTask(void *argument);
 void StartKeyboardTask(void *argument);
+void StartNEOM9NTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -97,7 +167,16 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, char *pcTaskName)
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
+  gpsQueue = osMessageQueueNew(
+    GPS_QUEUE_LENGTH,
+    sizeof(GpsFrame_t),
+    NULL
+);
 
+if (gpsQueue == NULL)
+{
+    Error_Handler();
+}
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -126,6 +205,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Keyboard */
   KeyboardHandle = osThreadNew(StartKeyboardTask, NULL, &Keyboard_attributes);
+
+  /* creation of NEO_M9N */
+  NEO_M9NHandle = osThreadNew(StartNEOM9NTask, NULL, &NEO_M9N_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -174,6 +256,21 @@ void StartKeyboardTask(void *argument)
   /* USER CODE END StartKeyboardTask */
 }
 
+/* USER CODE BEGIN Header_StartNEOM9NTask */
+/**
+* @brief Function implementing the NEO_M9N thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartNEOM9NTask */
+void StartNEOM9NTask(void *argument)
+{
+  /* USER CODE BEGIN StartNEOM9NTask */
+  /* Infinite loop */
+  NEOM9NTask();
+  /* USER CODE END StartNEOM9NTask */
+}
+
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
@@ -193,6 +290,42 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
             osThreadFlagsSet(KeyboardHandle, KEYBOARD_WAKE_FLAG);
         }
     }
+}
+
+void HAL_UARTEx_RxEventCallback(
+    UART_HandleTypeDef *huart,
+    uint16_t size)
+{
+    if (huart->Instance != USART1)
+    {
+        return;
+    }
+
+    gpsRxEventCount++;
+    gpsRxLastSize = size;
+
+    if (size > 0)
+    {
+        gpsFirstByte = gpsDmaBuffer[0];
+    }
+
+    GPS_ProcessReceivedBytes(
+        gpsDmaBuffer,
+        size
+    );
+
+    if (HAL_UARTEx_ReceiveToIdle_DMA(
+            &huart1,
+            gpsDmaBuffer,
+            sizeof(gpsDmaBuffer)) != HAL_OK)
+    {
+
+    }
+
+    __HAL_DMA_DISABLE_IT(
+        huart1.hdmarx,
+        DMA_IT_HT
+    );
 }
 /* USER CODE END Application */
 
