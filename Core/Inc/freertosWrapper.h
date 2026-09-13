@@ -5,7 +5,10 @@ extern "C" {
 #endif
 
 extern osSemaphoreId_t spiSem_;
+
 void displayTask(void);
+
+void keyboardTask(void);
 
 #ifdef __cplusplus
 }

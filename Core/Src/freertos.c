@@ -38,7 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define KEYBOARD_WAKE_FLAG (1U << 0)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -170,10 +170,7 @@ void StartKeyboardTask(void *argument)
 {
   /* USER CODE BEGIN StartKeyboardTask */
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+  keyboardTask();
   /* USER CODE END StartKeyboardTask */
 }
 
@@ -184,6 +181,17 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
     if (hspi->Instance == SPI1)
     {
         osSemaphoreRelease(spiSem_);
+    }
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if ((GPIO_Pin == SW0_Pin) || (GPIO_Pin == SW1_Pin))
+    {
+        if (KeyboardHandle != NULL)
+        {
+            osThreadFlagsSet(KeyboardHandle, KEYBOARD_WAKE_FLAG);
+        }
     }
 }
 /* USER CODE END Application */

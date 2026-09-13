@@ -87,7 +87,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // Włączenie śledzenia (DEMCR)
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;          // Włączenie licznika cykli (CYCCNT)
   /* USER CODE END Init */
 
   /* Configure the system clock */

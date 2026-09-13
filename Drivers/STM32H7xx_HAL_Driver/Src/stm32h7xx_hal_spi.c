@@ -2112,6 +2112,7 @@ HAL_StatusTypeDef HAL_SPI_Reload_TransmitReceive_IT(SPI_HandleTypeDef *hspi, con
   */
 HAL_StatusTypeDef HAL_SPI_Transmit_DMA(SPI_HandleTypeDef *hspi, const uint8_t *pData, uint16_t Size)
 {
+
   /* Check Direction parameter */
   assert_param(IS_SPI_DIRECTION_2LINES_OR_1LINE_2LINES_TXONLY(hspi->Init.Direction));
 

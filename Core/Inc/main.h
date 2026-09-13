@@ -71,6 +71,7 @@ void Error_Handler(void);
 #define COM2_GPIO_Port GPIOC
 #define SW0_Pin GPIO_PIN_3
 #define SW0_GPIO_Port GPIOC
+#define SW0_EXTI_IRQn EXTI3_IRQn
 #define PWR_PUSH_Pin GPIO_PIN_0
 #define PWR_PUSH_GPIO_Port GPIOA
 #define DISP_DIMMER_Pin GPIO_PIN_1
@@ -89,6 +90,7 @@ void Error_Handler(void);
 #define LCD_MOSI_GPIO_Port GPIOA
 #define SW1_Pin GPIO_PIN_4
 #define SW1_GPIO_Port GPIOC
+#define SW1_EXTI_IRQn EXTI4_IRQn
 #define USB_PHY_INT_Pin GPIO_PIN_5
 #define USB_PHY_INT_GPIO_Port GPIOC
 #define LED0_Pin GPIO_PIN_0
