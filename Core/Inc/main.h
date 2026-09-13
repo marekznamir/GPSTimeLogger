@@ -107,8 +107,6 @@ void Error_Handler(void);
 #define CHARGER_INT_GPIO_Port GPIOC
 #define SD_DET_Pin GPIO_PIN_7
 #define SD_DET_GPIO_Port GPIOC
-#define BUZZER_Pin GPIO_PIN_8
-#define BUZZER_GPIO_Port GPIOA
 #define LCD_RST_Pin GPIO_PIN_10
 #define LCD_RST_GPIO_Port GPIOA
 #define USB_DM_Pin GPIO_PIN_11

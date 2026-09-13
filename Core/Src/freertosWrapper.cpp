@@ -8,11 +8,14 @@
 #include "stm32h7xx_hal_gpio.h"
 #include "stm32h7xx_hal_tim.h"
 #include <cstdint>
+#include <cstdio>
+#include "string.h"
 
 #define KEYBOARD_WAKE_FLAG (1U << 0)
 
 DisplayController displayController;
 extern TIM_HandleTypeDef htim2;
+
 
 u8g2_t u8g2;
 bool initOnce = true;
@@ -39,6 +42,9 @@ void displayTask()
 
         __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
         HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+
+        HAL_GPIO_WritePin(GPS_RST_GPIO_Port, GPS_RST_Pin, GPIO_PIN_SET);
+        //osDelay(1000);
     }
 
     for(;;)
@@ -169,5 +175,105 @@ void keyboardTask()
 
         HAL_NVIC_EnableIRQ(EXTI3_IRQn);
         HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+    }
+}
+
+void NEOM9NTask()
+{
+static const char test[] = "USART2 TEST OK\r\n";
+
+    HAL_UART_Transmit(
+        &huart2,
+        (uint8_t *)test,
+        sizeof(test) - 1,
+        HAL_MAX_DELAY
+    );
+
+    HAL_GPIO_WritePin(
+        GPS_RST_GPIO_Port,
+        GPS_RST_Pin,
+        GPIO_PIN_SET
+    );
+
+    osDelay(10);
+
+    GpsFrame_t frame;
+
+    if (HAL_UARTEx_ReceiveToIdle_DMA(
+            &huart1,
+            gpsDmaBuffer,
+            sizeof(gpsDmaBuffer)) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    __HAL_DMA_DISABLE_IT(
+        huart1.hdmarx,
+        DMA_IT_HT
+    );
+
+    for (;;)
+    {
+        if (osMessageQueueGet(
+                gpsQueue,
+                &frame,
+                NULL,
+                osWaitForever) == osOK)
+        {
+
+            char* data = frame.data;
+
+            char lat_val[20] = {0};
+            char lat_dir[2] = {0};
+            char lon_val[20] = {0};
+            char lon_dir[2] = {0};
+            char fix[2] = {0};
+            char numOfSatelites[4] = {0};
+
+            if (strncmp(data, "$GNGGA", 6) == 0) 
+            {
+                uint16_t commaIndex = 0;
+                char* startPtr = data;
+
+                for (int j = 0; data[j] != '\0'; j++) 
+                {
+                    if (data[j] == ',' || data[j] == '*')
+                    {
+                        data[j] = '\0'; 
+                        
+                        switch (commaIndex) 
+                        {
+                            case 2: strncpy(lat_val, startPtr, sizeof(lat_val)-1); break;
+                            case 3: strncpy(lat_dir, startPtr, sizeof(lat_dir)-1); break;
+                            case 4: strncpy(lon_val, startPtr, sizeof(lon_val)-1); break;
+                            case 5: strncpy(lon_dir, startPtr, sizeof(lon_dir)-1); break;
+                            case 6: strncpy(fix, startPtr, sizeof(fix)-1); break;
+                            case 7: strncpy(numOfSatelites, startPtr, sizeof(numOfSatelites)-1); break;
+                        }
+                        
+                        commaIndex++;
+                        startPtr = &data[j + 1];
+                    }
+                }
+
+                char full_lat[32] = {0};
+                char full_lon[32] = {0};
+
+                strcpy(full_lat, lat_val);
+                strcpy(full_lon, lon_val);
+
+                strcat(full_lat, lat_dir);
+                strcat(full_lon, lon_dir);
+
+                displayController.setGPSData(full_lon, full_lat, fix, numOfSatelites);
+            }    
+            
+            HAL_UART_Transmit(
+                &huart2,
+                (uint8_t *)frame.data,
+                frame.length,
+                100
+            );
+        }
     }
 }

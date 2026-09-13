@@ -19,16 +19,15 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-#include "stm32h7a3xx.h"
 #include "task.h"
 #include "main.h"
+#include "FreeRTOS.h"
 #include "cmsis_os2.h"
-#include "string.h"
-#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "freertosWrapper.h"
+#include "string.h"
 //#include "DisplayController.hpp"
 
 /* USER CODE END Includes */
@@ -65,6 +64,13 @@ static uint16_t gpsAssemblyLength = 0;
 volatile uint32_t gpsRxEventCount = 0;
 volatile uint16_t gpsRxLastSize = 0;
 volatile uint8_t gpsFirstByte = 0;
+
+static uint8_t gpsProcessingBuffer[GPS_DMA_BUFFER_SIZE];
+
+volatile HAL_StatusTypeDef gpsRearmStatus = HAL_OK;
+volatile uint32_t gpsRearmErrorCount = 0;
+volatile uint32_t gpsUartError = 0;
+volatile uint32_t gpsDmaError = 0;
 /* USER CODE END Variables */
 /* Definitions for Display */
 osThreadId_t DisplayHandle;
@@ -304,27 +310,53 @@ void HAL_UARTEx_RxEventCallback(
     gpsRxEventCount++;
     gpsRxLastSize = size;
 
-    if (size > 0)
+    if (size > GPS_DMA_BUFFER_SIZE)
     {
-        gpsFirstByte = gpsDmaBuffer[0];
+        size = GPS_DMA_BUFFER_SIZE;
     }
 
-    GPS_ProcessReceivedBytes(
+    /*
+     * Zachowujemy dane, zanim gpsDmaBuffer ponownie
+     * zostanie przekazany do DMA.
+     */
+    memcpy(
+        gpsProcessingBuffer,
         gpsDmaBuffer,
         size
     );
 
-    if (HAL_UARTEx_ReceiveToIdle_DMA(
-            &huart1,
-            gpsDmaBuffer,
-            sizeof(gpsDmaBuffer)) != HAL_OK)
-    {
+    /*
+     * Usuń potencjalny overrun i natychmiast wznów DMA.
+     */
+    __HAL_UART_CLEAR_OREFLAG(&huart1);
 
+    gpsRearmStatus = HAL_UARTEx_ReceiveToIdle_DMA(
+        &huart1,
+        gpsDmaBuffer,
+        sizeof(gpsDmaBuffer)
+    );
+
+    gpsUartError = huart1.ErrorCode;
+    gpsDmaError = huart1.hdmarx->ErrorCode;
+
+    if (gpsRearmStatus == HAL_OK)
+    {
+        __HAL_DMA_DISABLE_IT(
+            huart1.hdmarx,
+            DMA_IT_HT
+        );
+    }
+    else
+    {
+        gpsRearmErrorCount++;
     }
 
-    __HAL_DMA_DISABLE_IT(
-        huart1.hdmarx,
-        DMA_IT_HT
+    /*
+     * Dopiero po ponownym uzbrojeniu DMA parsujemy kopię.
+     */
+    GPS_ProcessReceivedBytes(
+        gpsProcessingBuffer,
+        size
     );
 }
 /* USER CODE END Application */
