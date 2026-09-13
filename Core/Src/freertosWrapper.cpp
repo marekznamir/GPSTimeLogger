@@ -6,11 +6,14 @@
 #include "spi.h"
 #include "stm32h7a3xx.h"
 #include "stm32h7xx_hal_gpio.h"
+#include "stm32h7xx_hal_tim.h"
 #include <cstdint>
 
 #define KEYBOARD_WAKE_FLAG (1U << 0)
 
 DisplayController displayController;
+extern TIM_HandleTypeDef htim2;
+
 u8g2_t u8g2;
 bool initOnce = true;
 
@@ -33,10 +36,14 @@ void displayTask()
             COM0_Pin | COM1_Pin | COM2_Pin,
             GPIO_PIN_RESET
         );
+
+        __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
+        HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
     }
 
     for(;;)
     {
+        __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, displayController.getBrightness());
         displayController.render();
         osDelay(50);
     }
