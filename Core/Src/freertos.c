@@ -26,10 +26,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "FreeRTOSWrapper.hpp"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -48,26 +49,17 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for Display */
-osThreadId_t DisplayHandle;
-const osThreadAttr_t Display_attributes = {
-  .name = "Display",
-  .stack_size = 1024 * 4,
+/* Definitions for Main */
+osThreadId_t MainHandle;
+uint32_t MainBuffer[ 128 ];
+osStaticThreadDef_t MainControlBlock;
+const osThreadAttr_t Main_attributes = {
+  .name = "Main",
+  .cb_mem = &MainControlBlock,
+  .cb_size = sizeof(MainControlBlock),
+  .stack_mem = &MainBuffer[0],
+  .stack_size = sizeof(MainBuffer),
   .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for Keyboard */
-osThreadId_t KeyboardHandle;
-const osThreadAttr_t Keyboard_attributes = {
-  .name = "Keyboard",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
-/* Definitions for NEO_M9N */
-osThreadId_t NEO_M9NHandle;
-const osThreadAttr_t NEO_M9N_attributes = {
-  .name = "NEO_M9N",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityLow,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,15 +67,14 @@ const osThreadAttr_t NEO_M9N_attributes = {
 
 /* USER CODE END FunctionPrototypes */
 
-void StartDisplayTask(void *argument);
-void StartKeyboardTask(void *argument);
-void StartNEOM9NTask(void *argument);
+void StartMainTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* Hook prototypes */
 void vApplicationStackOverflowHook(xTaskHandle xTask, char *pcTaskName);
+void vApplicationMallocFailedHook(void);
 
 /* USER CODE BEGIN 4 */
 void vApplicationStackOverflowHook(xTaskHandle xTask, char *pcTaskName)
@@ -93,6 +84,22 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, char *pcTaskName)
    called if a stack overflow is detected. */
 }
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN 5 */
+void vApplicationMallocFailedHook(void)
+{
+   /* vApplicationMallocFailedHook() will only be called if
+   configUSE_MALLOC_FAILED_HOOK is set to 1 in FreeRTOSConfig.h. It is a hook
+   function that will get called if a call to pvPortMalloc() fails.
+   pvPortMalloc() is called internally by the kernel whenever a task, queue,
+   timer or semaphore is created. It is also called by various parts of the
+   demo application. If heap_1.c or heap_2.c are used, then the size of the
+   heap available to pvPortMalloc() is defined by configTOTAL_HEAP_SIZE in
+   FreeRTOSConfig.h, and the xPortGetFreeHeapSize() API function can be used
+   to query the size of free heap space that remains (although it does not
+   provide information on how the remaining heap might be fragmented). */
+}
+/* USER CODE END 5 */
 
 /**
   * @brief  FreeRTOS initialization
@@ -121,14 +128,8 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of Display */
-  DisplayHandle = osThreadNew(StartDisplayTask, NULL, &Display_attributes);
-
-  /* creation of Keyboard */
-  KeyboardHandle = osThreadNew(StartKeyboardTask, NULL, &Keyboard_attributes);
-
-  /* creation of NEO_M9N */
-  NEO_M9NHandle = osThreadNew(StartNEOM9NTask, NULL, &NEO_M9N_attributes);
+  /* creation of Main */
+  MainHandle = osThreadNew(StartMainTask, NULL, &Main_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -140,60 +141,23 @@ void MX_FREERTOS_Init(void) {
 
 }
 
-/* USER CODE BEGIN Header_StartDisplayTask */
+/* USER CODE BEGIN Header_StartMainTask */
 /**
-  * @brief  Function implementing the Display thread.
+  * @brief  Function implementing the Main thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDisplayTask */
-void StartDisplayTask(void *argument)
+/* USER CODE END Header_StartMainTask */
+void StartMainTask(void *argument)
 {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
-  /* USER CODE BEGIN StartDisplayTask */
+  /* USER CODE BEGIN StartMainTask */
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartDisplayTask */
-}
+  
+  App_MainTask(NULL);
 
-/* USER CODE BEGIN Header_StartKeyboardTask */
-/**
-* @brief Function implementing the Keyboard thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartKeyboardTask */
-void StartKeyboardTask(void *argument)
-{
-  /* USER CODE BEGIN StartKeyboardTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartKeyboardTask */
-}
-
-/* USER CODE BEGIN Header_StartNEOM9NTask */
-/**
-* @brief Function implementing the NEO_M9N thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartNEOM9NTask */
-void StartNEOM9NTask(void *argument)
-{
-  /* USER CODE BEGIN StartNEOM9NTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartNEOM9NTask */
+  /* USER CODE END StartMainTask */
 }
 
 /* Private application code --------------------------------------------------*/
