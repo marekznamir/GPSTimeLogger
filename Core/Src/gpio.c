@@ -51,8 +51,10 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPS_EINT_Pin|GPS_RST_Pin|COM0_Pin|COM1_Pin
-                          |COM2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPS_EINT_Pin|COM0_Pin|COM1_Pin|COM2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPS_RST_GPIO_Port, GPS_RST_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LCD_CD_GPIO_Port, LCD_CD_Pin, GPIO_PIN_RESET);

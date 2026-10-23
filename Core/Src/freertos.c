@@ -61,6 +61,30 @@ const osThreadAttr_t Main_attributes = {
   .stack_size = sizeof(MainBuffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for Gps */
+osThreadId_t GpsHandle;
+uint32_t GpsBuffer[ 1024 ];
+osStaticThreadDef_t GpsControlBlock;
+const osThreadAttr_t Gps_attributes = {
+  .name = "Gps",
+  .cb_mem = &GpsControlBlock,
+  .cb_size = sizeof(GpsControlBlock),
+  .stack_mem = &GpsBuffer[0],
+  .stack_size = sizeof(GpsBuffer),
+  .priority = (osPriority_t) osPriorityBelowNormal7,
+};
+/* Definitions for Cfg */
+osThreadId_t CfgHandle;
+uint32_t ConfigureBuffer[ 1024 ];
+osStaticThreadDef_t ConfigureControlBlock;
+const osThreadAttr_t Cfg_attributes = {
+  .name = "Cfg",
+  .cb_mem = &ConfigureControlBlock,
+  .cb_size = sizeof(ConfigureControlBlock),
+  .stack_mem = &ConfigureBuffer[0],
+  .stack_size = sizeof(ConfigureBuffer),
+  .priority = (osPriority_t) osPriorityLow,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -68,6 +92,8 @@ const osThreadAttr_t Main_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartMainTask(void *argument);
+void StartGpsTask(void *argument);
+void StartCfgTask(void *argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -131,6 +157,12 @@ void MX_FREERTOS_Init(void) {
   /* creation of Main */
   MainHandle = osThreadNew(StartMainTask, NULL, &Main_attributes);
 
+  /* creation of Gps */
+  GpsHandle = osThreadNew(StartGpsTask, NULL, &Gps_attributes);
+
+  /* creation of Cfg */
+  CfgHandle = osThreadNew(StartCfgTask, NULL, &Cfg_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -158,6 +190,36 @@ void StartMainTask(void *argument)
   App_MainTask(NULL);
 
   /* USER CODE END StartMainTask */
+}
+
+/* USER CODE BEGIN Header_StartGpsTask */
+/**
+* @brief Function implementing the Gps thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartGpsTask */
+void StartGpsTask(void *argument)
+{
+  /* USER CODE BEGIN StartGpsTask */
+  /* Infinite loop */
+  App_GpsTask(GpsHandle);
+  /* USER CODE END StartGpsTask */
+}
+
+/* USER CODE BEGIN Header_StartCfgTask */
+/**
+* @brief Function implementing the Cfg thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartCfgTask */
+void StartCfgTask(void *argument)
+{
+  /* USER CODE BEGIN StartCfgTask */
+  /* Infinite loop */
+  App_CfgTask(NULL);
+  /* USER CODE END StartCfgTask */
 }
 
 /* Private application code --------------------------------------------------*/
