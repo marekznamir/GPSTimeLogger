@@ -10,5 +10,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     {
         NEO_M9N_RxEventCallback(Size);
     }
+    else if(huart->Instance == USART2)
+    {
+        CLIENT_RxEventCallback(Size);
+    }
 }
 

@@ -20,9 +20,11 @@ extern osThreadId_t CfgHandle;
 #define X_BUFFER_TRIGGER_SIZE 1 // bytes
 
 #define DMA_BUFFER_SIZE 128
-extern uint8_t dmaBuffer[DMA_BUFFER_SIZE];
+extern uint8_t dmaBufferGpsRx[DMA_BUFFER_SIZE];
+extern uint8_t dmaBufferClientRx[DMA_BUFFER_SIZE];
 
-extern StreamBufferHandle_t xStreamBuffer;
+extern StreamBufferHandle_t xStreamBufferGps;
+extern StreamBufferHandle_t xStreamBufferClient;
 
 void App_MainTask(void *arg);
 
