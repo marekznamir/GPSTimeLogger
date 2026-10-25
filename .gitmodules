@@ -1,0 +1,3 @@
+[submodule "App/Inc/Display"]
+	path = App/Inc/Display
+	url = https://github.com/marekznamir/Display
