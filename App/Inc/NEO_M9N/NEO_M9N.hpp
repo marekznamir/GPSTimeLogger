@@ -13,7 +13,7 @@ void CLIENT_RxEventCallback(uint16_t size);
 uint8_t UBXFrameDecode(uint8_t* frame, uint8_t* payload);
 
 union UBX_NAV_PVT {
-    struct {
+    struct PVT {
         uint32_t iTOW;          // [ms] GPS time of week of the navigation epoch
         uint16_t year;          // [y] Year (UTC)
         uint8_t  month;         // [month] Month, range 1..12 (UTC)
