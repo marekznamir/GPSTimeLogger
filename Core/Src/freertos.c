@@ -31,6 +31,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 typedef StaticTask_t osStaticThreadDef_t;
+typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -84,6 +85,14 @@ const osThreadAttr_t Cfg_attributes = {
   .stack_mem = &ConfigureBuffer[0],
   .stack_size = sizeof(ConfigureBuffer),
   .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for spiSem */
+osSemaphoreId_t spiSemHandle;
+osStaticSemaphoreDef_t spiSemControlBlock;
+const osSemaphoreAttr_t spiSem_attributes = {
+  .name = "spiSem",
+  .cb_mem = &spiSemControlBlock,
+  .cb_size = sizeof(spiSemControlBlock),
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -140,6 +149,10 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* creation of spiSem */
+  spiSemHandle = osSemaphoreNew(1, 0, &spiSem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
