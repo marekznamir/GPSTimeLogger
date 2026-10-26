@@ -14,6 +14,8 @@ extern osThreadId_t MainHandle;
 extern osThreadId_t GpsHandle;
 extern osThreadId_t CfgHandle;
 
+extern osSemaphoreId_t spiSemHandle;
+
 #define FLAG_START_CFG (1U << 0)
 
 #define X_BUFFER_SIZE 128 // bytes

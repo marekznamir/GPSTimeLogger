@@ -10,6 +10,8 @@
 #include "stream_buffer.h"
 #include <cstring>
 
+#include "Display/Inc/DisplayController.hpp"
+
 uint8_t dmaBufferGpsRx[DMA_BUFFER_SIZE];
 uint8_t dmaBufferClientRx[DMA_BUFFER_SIZE];
 
@@ -22,9 +24,12 @@ bool IS_IN_CFG_MODE = false; // temp val, dla trybu configure
 
 // comprende?
 
+static DisplayController displayController;
+
 void App_MainTask(void *arg)
 {
-    
+    displayController.init();
+
     if(IS_IN_CFG_MODE)
     {
         osThreadFlagsSet(CfgHandle, FLAG_START_CFG);    
@@ -32,6 +37,7 @@ void App_MainTask(void *arg)
 
     for(;;)
     {
+        displayController.draw();
         osDelay(50);
     }
 }
@@ -52,7 +58,7 @@ void App_GpsTask(void *arg)
         UBX_NAV_PVT payload;
         if(UBXFrameDecode(gpsData, payload.data) == 0)
         {
-            HAL_UART_Transmit(&huart2, &payload.pvt.min, 2, 100);
+            //HAL_UART_Transmit(&huart2, &payload.pvt.min, 2, 100);
         }
 
         //HAL_UART_Transmit(&huart2, payload, messageSize - 8, 100);
