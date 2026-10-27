@@ -1,5 +1,4 @@
 #include "FreeRTOSWrapper.hpp"
-
 #include "NEO_M9N/NEO_M9N.hpp"
 #include "portmacro.h"
 #include "task.h"
@@ -9,8 +8,10 @@
 #include "usart.h"
 #include "stream_buffer.h"
 #include <cstring>
+#include <cstdio>
 
 #include "Display/Inc/DisplayController.hpp"
+#include "Display/Inc/Terminal/Terminal.hpp"
 
 uint8_t dmaBufferGpsRx[DMA_BUFFER_SIZE];
 uint8_t dmaBufferClientRx[DMA_BUFFER_SIZE];
@@ -24,6 +25,7 @@ bool IS_IN_CFG_MODE = false; // temp val, dla trybu configure
 
 // comprende?
 
+cmd::Terminal terminal0;
 static DisplayController displayController;
 
 void App_MainTask(void *arg)
@@ -58,11 +60,10 @@ void App_GpsTask(void *arg)
         UBX_NAV_PVT payload;
         if(UBXFrameDecode(gpsData, payload.data) == 0)
         {
-            //HAL_UART_Transmit(&huart2, &payload.pvt.min, 2, 100);
+            //HAL_UART_Transmit(&huart2, &payload.pvt.min, 2, 100);        
         }
 
         //HAL_UART_Transmit(&huart2, payload, messageSize - 8, 100);
-
         osDelay(1);
     }
 }
