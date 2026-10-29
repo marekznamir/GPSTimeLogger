@@ -13,6 +13,8 @@
 #include "Display/Inc/DisplayController.hpp"
 #include "Display/Inc/Terminal/Terminal.hpp"
 
+namespace cmd = Command;
+
 uint8_t dmaBufferGpsRx[DMA_BUFFER_SIZE];
 uint8_t dmaBufferClientRx[DMA_BUFFER_SIZE];
 
@@ -65,10 +67,8 @@ void App_GpsTask(void *arg)
         UBX_NAV_PVT payload;
         if(UBXFrameDecode(gpsData, payload.data) == 0)
         {
-            //HAL_UART_Transmit(&huart2, &payload.pvt.min, 2, 100);        
+   
         }
-
-        //HAL_UART_Transmit(&huart2, payload, messageSize - 8, 100);
         osDelay(1);
     }
 }
