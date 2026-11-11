@@ -21,8 +21,10 @@ target_include_directories(App PUBLIC
 
 set(STM32H7A3xx TRUE)
 add_subdirectory(Inc/Display)
+add_subdirectory(Inc/Delta)
 
 target_link_libraries(App PUBLIC
     stm32cubemx
     Display
+    Delta
 )
