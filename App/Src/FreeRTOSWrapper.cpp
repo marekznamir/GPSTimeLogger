@@ -12,6 +12,7 @@
 
 #include "Display/Inc/DisplayController.hpp"
 #include "Display/Inc/Terminal/Terminal.hpp"
+#include "Delta/Inc/TrackSession.hpp"
 
 namespace cmd = Command;
 
@@ -60,6 +61,9 @@ void App_GpsTask(void *arg)
 
     uint8_t gpsData[128];
 
+    TrackSession track_session;
+    track_session.start();
+
     for(;;)
     {
         auto messageSize = xStreamBufferReceive(xStreamBufferGps, gpsData, X_BUFFER_SIZE, portMAX_DELAY);
@@ -67,7 +71,12 @@ void App_GpsTask(void *arg)
         UBX_NAV_PVT payload;
         if(UBXFrameDecode(gpsData, payload.data) == 0)
         {
-            cmd::write(payload.pvt.month, terminal0);
+            terminal0.clear();
+            track_session.processData(payload.pvt.lat, payload.pvt.lon, payload.pvt.height, payload.pvt.velN, payload.pvt.velE, payload.pvt.headMot);
+            terminal0.printf("Delta [ms]: %d\n", track_session.getDelta());
+            terminal0.printf("Velocity [mm^2/s^2]: %d\n", (payload.pvt.velN * payload.pvt.velE));
+            terminal0.printf("Lat [deg]: %d Lon [deg]: %d\n", payload.pvt.lat, payload.pvt.lon);
+            terminal0.printf("Fix:  %d %d\n", payload.pvt.fixType, payload.pvt.fixType);
         }
         osDelay(1);
     }
