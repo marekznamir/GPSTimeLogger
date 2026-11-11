@@ -51,11 +51,6 @@ void App_GpsTask(void *arg)
 {
     xStreamBufferGps = xStreamBufferCreate(X_BUFFER_SIZE, X_BUFFER_TRIGGER_SIZE);
 
-    // __HAL_UART_CLEAR_FLAG(&huart1, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_FEF |
-    //                                UART_CLEAR_PEF  | UART_CLEAR_IDLEF);
-    // __HAL_UART_SEND_REQ(&huart1, UART_RXDATA_FLUSH_REQUEST);
-    // huart1.ErrorCode = HAL_UART_ERROR_NONE;
-
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, dmaBufferGpsRx, DMA_BUFFER_SIZE);
     __HAL_DMA_DISABLE_IT(huart1.hdmarx, DMA_IT_HT);
 
