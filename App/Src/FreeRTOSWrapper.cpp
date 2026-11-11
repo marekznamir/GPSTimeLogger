@@ -1,9 +1,8 @@
 #include "FreeRTOSWrapper.hpp"
 #include "NEO_M9N/NEO_M9N.hpp"
-#include "portmacro.h"
-#include "task.h"
 #include "main.h"
 #include "FreeRTOS.h"
+#include "task.h"
 #include "cmsis_os2.h"
 #include "usart.h"
 #include "stream_buffer.h"
@@ -82,6 +81,7 @@ void App_GpsTask(void *arg)
             terminal0.printf("Velocity [mm^2/s^2]: %d\n", (payload.pvt.velN * payload.pvt.velE));
             terminal0.printf("Lat [deg]: %d Lon [deg]: %d\n", payload.pvt.lat, payload.pvt.lon);
             terminal0.printf("Fix:  %d %d\n", payload.pvt.fixType, payload.pvt.fixType);
+            HAL_UART_Transmit_DMA(&huart2, gpsData, messageSize);
         }
         osDelay(1);
     }
