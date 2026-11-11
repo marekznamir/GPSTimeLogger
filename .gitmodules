@@ -1,3 +1,6 @@
 [submodule "App/Inc/Display"]
 	path = App/Inc/Display
 	url = https://github.com/marekznamir/Display
+[submodule "App/Inc/Delta"]
+	path = App/Inc/Delta
+	url = https://github.com/marekznamir/Delta.git
