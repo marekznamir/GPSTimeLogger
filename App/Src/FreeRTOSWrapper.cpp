@@ -72,7 +72,17 @@ void App_GpsTask(void *arg)
         if(UBXFrameDecode(gpsData, payload.data) == 0)
         {
             terminal0.clear();
-            track_session.processData(payload.pvt.lat, payload.pvt.lon, payload.pvt.height, payload.pvt.velN, payload.pvt.velE, payload.pvt.headMot);
+            track_session.processData(
+                payload.pvt.lat,
+                payload.pvt.lon,
+                payload.pvt.height,
+                payload.pvt.velN,
+                payload.pvt.velE,
+                payload.pvt.headMot,
+                payload.pvt.fixType,
+                payload.pvt.gnssFixOK && !payload.pvt.invalidLlh,
+                payload.pvt.sAcc
+            );
             terminal0.printf("Delta [ms]: %d\n", track_session.getDelta());
             terminal0.printf("Velocity [mm^2/s^2]: %d\n", (payload.pvt.velN * payload.pvt.velE));
             terminal0.printf("Lat [deg]: %d Lon [deg]: %d\n", payload.pvt.lat, payload.pvt.lon);
