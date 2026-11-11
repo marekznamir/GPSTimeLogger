@@ -66,7 +66,7 @@ Add to UBXFrameDecode enum class as return value
 
     if(message_class == 0x01 && messsage_id == 0x07)
     {
-        std::memcpy(payload, &frame[PAYLOAD_START_INDEX], payload_end_index);
+        std::memcpy(payload, &frame[PAYLOAD_START_INDEX], pLen);
         return 0;
     }
 
