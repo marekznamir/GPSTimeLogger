@@ -52,7 +52,7 @@ typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE END Variables */
 /* Definitions for Main */
 osThreadId_t MainHandle;
-uint32_t MainBuffer[ 128 ];
+uint32_t MainBuffer[ 1024 ];
 osStaticThreadDef_t MainControlBlock;
 const osThreadAttr_t Main_attributes = {
   .name = "Main",
